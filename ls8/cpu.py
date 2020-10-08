@@ -9,6 +9,7 @@ class CPU:
     def __init__(self):
         self.ram = [0] * 256
         self.reg = [0] * 8
+        self.reg[7] = 0xF4
         self.pc = 0
         
     def ram_read(self, mar):
@@ -93,6 +94,8 @@ class CPU:
             PRN = 0b01000111
             HLT = 0b00000001
             MUL = 0b10100010
+            PUSH = 0b01000101
+            POP = 0b01000110
             
             
             IR = self.ram_read(self.pc)
@@ -116,6 +119,28 @@ class CPU:
             elif IR == MUL:
                 print(self.reg[operand_a] * self.reg[operand_b])
                 self.pc += 3
+                
+            elif IR == PUSH:
+                self.reg[7] -= 1
+                
+                value = self.reg[operand_a]
+                
+                SP = self.reg[7]
+                
+                self.ram_write(SP, value)
+                
+                self.pc += 2
+                
+            elif IR == POP:
+                SP = self.reg[7]
+                
+                value = self.ram_read(SP)
+                
+                self.reg[operand_a] = value
+                
+                self.reg[7] += 1
+                
+                self.pc += 2
                 
             else: 
                 print ('try again')
