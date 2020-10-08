@@ -121,26 +121,26 @@ class CPU:
                 self.pc += 3
                 
             elif IR == PUSH:
-                self.reg[7] -= 1
+                self.reg[7] -= 1 ## go down one for SP
                 
-                value = self.reg[operand_a]
+                value = self.reg[operand_a] ## value to push is at pc + 1 adress, push this into register
                 
-                SP = self.reg[7]
+                SP = self.reg[7] ## SP is at reg[7]
                 
-                self.ram_write(SP, value)
+                self.ram_write(SP, value) ## put the value at adress of SP into ram
                 
-                self.pc += 2
+                self.pc += 2 ## move to next lines of code
                 
             elif IR == POP:
-                SP = self.reg[7]
+                SP = self.reg[7] ## stak pointer
                 
-                value = self.ram_read(SP)
+                value = self.ram_read(SP) ## value is what is at the ram address of the SP
                 
-                self.reg[operand_a] = value
+                self.reg[operand_a] = value ## put the value from the adress of pc + 1 into the register
                 
-                self.reg[7] += 1
+                self.reg[7] += 1 ## move the SP pointer up 1
                 
-                self.pc += 2
+                self.pc += 2 ## move pc pointer to next lines of memory
                 
             else: 
                 print ('try again')
