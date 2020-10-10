@@ -76,6 +76,41 @@ class CPU:
             elif self.reg[reg_a] > self.reg[reg_b]:
                 # print("here in CMP greater")
                 self.greater_than = 0b00000001
+                
+        elif op == "AND":
+            new_result = self.reg[reg_a] & self.reg[reg_b]
+            
+            self.reg[reg_a] = new_result
+            
+        elif op == "OR":
+            new_result = self.reg[reg_a] | self.reg[reg_b]
+            
+            self.reg[reg_a] = new_result
+        
+        elif op == "XOR":
+            new_result = self.reg[reg_a] ^ self.reg[reg_b]
+            
+            self.reg[reg_a] = new_result
+        
+        elif op == "NOT":
+            new_result = self.reg[reg_a] - 0b11111111
+            
+            self.reg[reg_a] = new_result
+        
+        elif op == "SHL":
+            
+           self.reg[reg_a] << self.reg[reg_b]
+           
+        elif op == "SHR":
+            
+            self.reg[reg_a] >> self.reg[reg_b]
+            
+        elif op == "MOD":
+            
+            new_result = self.reg[reg_a] / self.reg[reg_b]
+            
+            self.reg[reg_a] = new_result
+                 
             
         #elif op == "SUB": etc
         else:
@@ -126,6 +161,7 @@ class CPU:
             MUL = 0b10100010
             ADD = 0b10100000
             CMP = 0b10100111
+            AND = 0b10101000
             
             
             
@@ -135,6 +171,7 @@ class CPU:
             
             if IR == LDI:
                 self.reg[operand_a] = operand_b
+                print(bin(operand_a << operand_b))
                 # self.pc += 3
                 
             elif IR == PRN:
@@ -171,10 +208,11 @@ class CPU:
                 # self.pc += 2 ## move pc pointer to next lines of memory
                 
             elif IR == ADD:
+                
                 self.alu("ADD", operand_a, operand_b)
                 
             elif IR == CMP:
-                # print(operand_a, operand_b)
+                
                 self.alu("CMP", operand_a, operand_b)
                 
                 
@@ -193,9 +231,8 @@ class CPU:
                 self.pc = subroutine_address
                 
                 
-                
-                
             elif IR == RET:
+                
                 SP = self.reg[7]
                 
                 return_address = self.ram[SP]
@@ -205,6 +242,7 @@ class CPU:
                 self.reg[7] += 1
                 
             elif IR == JMP:
+                
                 self.pc = self.reg[operand_a]
                 
             elif IR == JEQ:
@@ -218,10 +256,36 @@ class CPU:
             elif IR == JNE:
                 
                 if self.equal == 0:
-                
                     self.pc = self.reg[operand_a]
                 else:
                     self.pc += 2
+                    
+            elif IR == AND:
+                self.alu("AND", operand_a, operand_b)
+            
+            elif IR == OR:
+                self.alu("OR", operand_a, operand_b)
+                
+            elif IR == XOR:
+                self.alu("XOR", operand_a, operand_b)
+                
+            elif IR == NOT:
+                self.alu("NOT", operand_a, operand_b)
+            
+            elif IR == SHL:
+                self.alu("SHL", operand_a, operand_b)
+                
+            elif IR == SHR:
+                self.alu("SHR", operand_a, operand_b)
+                
+            elif IR == MOD:
+                
+                if operand_b == 0:
+                    print("error")
+                    running = False
+                    
+                self.alu("MOD", operand_a, operand_b)
+                
                 
                 
             else: 
