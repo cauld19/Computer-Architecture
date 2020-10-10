@@ -89,6 +89,9 @@ class CPU:
         running = True
         
         while running:
+            IR = self.ram_read(self.pc)
+            
+            num_args = IR >> 6
             
             LDI = 0b10000010
             PRN = 0b01000111
@@ -96,21 +99,24 @@ class CPU:
             MUL = 0b10100010
             PUSH = 0b01000101
             POP = 0b01000110
+            CALL = 0b01010000
+            RET = 0b00010001
+            ADD = 0b10100000
             
             
-            IR = self.ram_read(self.pc)
+            
             
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
             
             if IR == LDI:
                 self.reg[operand_a] = operand_b
-                self.pc += 3
+                # self.pc += 3
                 
             elif IR == PRN:
                 
                 print(self.reg[operand_a])
-                self.pc += 2
+                # self.pc += 2
                 
                 
             elif IR == HLT:
@@ -118,7 +124,7 @@ class CPU:
                 
             elif IR == MUL:
                 print(self.reg[operand_a] * self.reg[operand_b])
-                self.pc += 3
+                # self.pc += 3
                 
             elif IR == PUSH:
                 self.reg[7] -= 1 ## go down one for SP
@@ -129,7 +135,7 @@ class CPU:
                 
                 self.ram_write(SP, value) ## put the value at adress of SP into ram
                 
-                self.pc += 2 ## move to next lines of code
+                # self.pc += 2 ## move to next lines of code
                 
             elif IR == POP:
                 SP = self.reg[7] ## stak pointer
@@ -140,10 +146,46 @@ class CPU:
                 
                 self.reg[7] += 1 ## move the SP pointer up 1
                 
-                self.pc += 2 ## move pc pointer to next lines of memory
+                # self.pc += 2 ## move pc pointer to next lines of memory
+                
+            elif IR == ADD:
+                self.alu("ADD", operand_a, operand_b)
+                
+                
+            elif IR == CALL:
+                
+                return_address = self.pc + 2
+                
+                self.reg[7] -= 1
+                
+                SP = self.reg[7]
+                
+                self.ram_write(SP, return_address)
+                
+                subroutine_address = self.reg[operand_a]
+                
+                self.pc = subroutine_address
+                
+                
+                
+                
+            elif IR == RET:
+                SP = self.reg[7]
+                
+                return_address = self.ram[SP]
+                                
+                self.pc = return_address
+                
+                self.reg[7] += 1
+                
                 
             else: 
                 print ('try again')
-        
+                
+            sets_pc_directly = ((IR >> 4) & 0b0001) == 1
+            
+            if not sets_pc_directly:
+                self.pc += 1 + num_args
+                
         
         
