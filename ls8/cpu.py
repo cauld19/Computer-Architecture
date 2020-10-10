@@ -11,6 +11,9 @@ class CPU:
         self.reg = [0] * 8
         self.reg[7] = 0xF4
         self.pc = 0
+        self.equal = 0b00000000
+        self.less_than = 0b00000000
+        self.greater_than = 0b00000000
         
     def ram_read(self, mar):
         return self.ram[mar]
@@ -58,6 +61,22 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
+            
+        elif op == "MUL":
+            self.reg[reg_a] * self.reg[reg_b]
+            
+        elif op == "CMP":
+            
+            if self.reg[reg_a] == self.reg[reg_b]:
+                # print("here in CMP equal")
+                self.equal = 0b00000001
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                # print("here in CMP less")
+                self.less_than = 0b00000001
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                # print("here in CMP greater")
+                self.greater_than = 0b00000001
+            
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -80,7 +99,7 @@ class CPU:
         for i in range(8):
             print(" %02X" % self.reg[i], end='')
 
-        print()
+        
 
     def run(self):
         
@@ -96,12 +115,17 @@ class CPU:
             LDI = 0b10000010
             PRN = 0b01000111
             HLT = 0b00000001
-            MUL = 0b10100010
             PUSH = 0b01000101
             POP = 0b01000110
             CALL = 0b01010000
             RET = 0b00010001
+            JMP = 0b01010100
+            JEQ = 0b01010101
+            JNE = 0b01010110
+            
+            MUL = 0b10100010
             ADD = 0b10100000
+            CMP = 0b10100111
             
             
             
@@ -114,8 +138,7 @@ class CPU:
                 # self.pc += 3
                 
             elif IR == PRN:
-                
-                print(self.reg[operand_a])
+                print("here in print", self.reg[operand_a])
                 # self.pc += 2
                 
                 
@@ -123,8 +146,7 @@ class CPU:
                 running = False
                 
             elif IR == MUL:
-                print(self.reg[operand_a] * self.reg[operand_b])
-                # self.pc += 3
+                self.alu("MUL", operand_a, operand_b)
                 
             elif IR == PUSH:
                 self.reg[7] -= 1 ## go down one for SP
@@ -150,6 +172,10 @@ class CPU:
                 
             elif IR == ADD:
                 self.alu("ADD", operand_a, operand_b)
+                
+            elif IR == CMP:
+                # print(operand_a, operand_b)
+                self.alu("CMP", operand_a, operand_b)
                 
                 
             elif IR == CALL:
@@ -177,6 +203,25 @@ class CPU:
                 self.pc = return_address
                 
                 self.reg[7] += 1
+                
+            elif IR == JMP:
+                self.pc = self.reg[operand_a]
+                
+            elif IR == JEQ:
+                
+                
+                if self.equal == 1:
+                    self.pc = self.reg[operand_a]
+                else:
+                    self.pc += 2 
+                   
+            elif IR == JNE:
+                
+                if self.equal == 0:
+                
+                    self.pc = self.reg[operand_a]
+                else:
+                    self.pc += 2
                 
                 
             else: 
